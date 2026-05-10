@@ -5,6 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
+
 jobs:
   sync-to-hf-space:
     runs-on: ubuntu-latest
