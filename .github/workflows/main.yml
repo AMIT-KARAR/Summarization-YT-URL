@@ -1,29 +1,32 @@
-name: Sync to Hugging Face hub
+name: Sync To Hub
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: [ main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
 
 jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Push to Hugging Face Space
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      - name: Set Git identity
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
 
-          git config --global credential.helper store
-          echo "https://user:$HF_TOKEN@huggingface.co" > ~/.git-credentials
+      - name: Modify file
+        run: echo "Updated on $(date)" >> sync.log
 
-          git remote add hf https://huggingface.co/spaces/Amitkarar/YTvideoandURLsummarization
-          git push --force hf main
+      - name: Commit and push
+        run: |
+          git add .
+          git commit -m "Auto update" || echo "Nothing to commit"
+          git push
