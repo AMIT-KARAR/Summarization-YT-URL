@@ -5,9 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   sync-to-hf-space:
     runs-on: ubuntu-latest
@@ -16,16 +13,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Hugging Face CLI
+        run: pip install huggingface_hub
+
+      # ✅ Proper authentication (HF supported way)
+      - name: Login to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          huggingface-cli login --token $HF_TOKEN
+
       - name: Configure Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-
-      # ✅ Proper HF authentication (NEW WAY)
-      - name: Authenticate with Hugging Face
-        run: |
-          git config --global credential.helper store
-          echo "https://Amitkarar:${{ secrets.HF_TOKEN }}@huggingface.co" > ~/.git-credentials
 
       - name: Add HF Space remote
         run: |
