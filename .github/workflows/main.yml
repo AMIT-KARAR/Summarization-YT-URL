@@ -5,44 +5,39 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-# ✅ Fix Node 24 deprecation warning
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-permissions:
-  contents: write
 
 jobs:
   sync-to-hf-space:
     runs-on: ubuntu-latest
 
     steps:
-      # ------------------------------------------------------------
-      # STEP 1 — Checkout your GitHub repository code
-      # ------------------------------------------------------------
-      - name: Checkout repository
+      # STEP 1 — Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # ------------------------------------------------------------
-      # STEP 2 — Configure Git identity (required for push)
-      # ------------------------------------------------------------
+      # STEP 2 — Git identity
       - name: Configure Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
 
-      # ------------------------------------------------------------
-      # STEP 3 — Add Hugging Face Space as a second remote
-      # ------------------------------------------------------------
-      - name: Add Hugging Face remote
+      # STEP 3 — Remove old hf remote if exists (THIS FIXES 128 ERROR)
+      - name: Clean old remote
         run: |
-          git remote add hf https://Amitkarar:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Amitkarar/Chatboat_With_PDF
+          git remote remove hf || true
 
-      # ------------------------------------------------------------
-      # STEP 4 — Push ALL files from GitHub to Hugging Face Space
-      # ------------------------------------------------------------
-      - name: Push code to Hugging Face Space
+      # STEP 4 — Add Hugging Face remote correctly
+      - name: Add HF remote
+        run: |
+          git remote add hf https://Amitkarar:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Amitkarar/Summarization-YT-URL
+
+      # STEP 5 — Verify remotes (for debugging)
+      - name: Show remotes
+        run: git remote -v
+
+      # STEP 6 — Push to Hugging Face
+      - name: Push to HF Space
         run: |
           git push hf main --force
