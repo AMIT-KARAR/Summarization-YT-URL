@@ -13,25 +13,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Hugging Face CLI
-        run: pip install huggingface_hub
+      - name: Install HF CLI
+        run: pip install -U huggingface_hub
 
-      # ✅ Proper authentication (HF supported way)
-      - name: Login to Hugging Face
+      # ✅ Login using new HF CLI
+      - name: HF Login
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          huggingface-cli login --token $HF_TOKEN
+        run: hf auth login --token $HF_TOKEN
 
-      - name: Configure Git
+      # ✅ Upload entire repo to the Space (NO GIT)
+      - name: Upload files to HF Space
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-
-      - name: Add HF Space remote
-        run: |
-          git remote remove hf || true
-          git remote add hf https://huggingface.co/spaces/Amitkarar/YTvideoandURLsummarization
-
-      - name: Push to HF Space
-        run: git push hf main --force
+          hf upload \
+            Amitkarar/YTvideoandURLsummarization \
+            . \
+            --repo-type space \
+            --commit-message "Sync from GitHub Actions"
