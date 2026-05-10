@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure Git
         run: |
@@ -26,7 +28,7 @@ jobs:
 
       - name: Add HF Space remote
         run: |
-          git remote add hf https://Amitkarar:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Amitkarar/YTvideoandURLsummarization
+          git remote add hf https://git:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Amitkarar/YTvideoandURLsummarization
 
       - name: Push to HF Space
         run: git push hf main --force
