@@ -1,9 +1,11 @@
-name: Sync To Hub
+name: Sync GitHub Repo to Hugging Face Space
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
+# ✅ Fix Node 24 deprecation warning
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -11,22 +13,36 @@ permissions:
   contents: write
 
 jobs:
-  sync-to-hub:
+  sync-to-hf-space:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # ------------------------------------------------------------
+      # STEP 1 — Checkout your GitHub repository code
+      # ------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set Git identity
+      # ------------------------------------------------------------
+      # STEP 2 — Configure Git identity (required for push)
+      # ------------------------------------------------------------
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
 
-      - name: Modify file
-        run: echo "Updated on $(date)" >> sync.log
-
-      - name: Commit and push
+      # ------------------------------------------------------------
+      # STEP 3 — Add Hugging Face Space as a second remote
+      # ------------------------------------------------------------
+      - name: Add Hugging Face remote
         run: |
-          git add .
-          git commit -m "Auto update" || echo "Nothing to commit"
-          git push
+          git remote add hf https://Amitkarar:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Amitkarar/Chatboat_With_PDF
+
+      # ------------------------------------------------------------
+      # STEP 4 — Push ALL files from GitHub to Hugging Face Space
+      # ------------------------------------------------------------
+      - name: Push code to Hugging Face Space
+        run: |
+          git push hf main --force
